@@ -6,4 +6,5 @@ langchain_groq
 langchain_openai
 faiss-cpu
 streamlit
-tavily-python
+# tavily-python
+langchain-tavily
