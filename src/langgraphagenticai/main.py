@@ -21,13 +21,36 @@ def load_langgraph_agenticai_app():
         st.error("Error: Failed to load user input from the UI")
         return
 
+    # Handle AI News button click
+    if st.session_state.IsFetchButtonClicked and user_input.get("selected_usecase") == "AI News":
+        try:
+            # configure the llms
+            obj_llm_config = GroqLLM(user_controls_input=user_input)
+            model = obj_llm_config.get_llm_models()
+
+            if not model:
+                st.error("Error: LLM Model could not be initialized")
+                return
+
+            graph_builder = GraphBuilder(model)
+            try:
+                graph = graph_builder.setup_graph("AI News")
+                timeframe = st.session_state.timeframe
+                DisplayResultStreamlit("AI News", graph, timeframe).display_result_on_ui()
+            except Exception as e:
+                st.error(f"Graph setup failed - {e}")
+        except Exception as e:
+            st.error(f"Error initializing LLM - {e}")
+        return
+
+    # Handle regular chat input
     user_message = st.chat_input("Enter your message:")
 
     if user_message:
         try:
             # configure the llms
             obj_llm_config = GroqLLM(user_controls_input=user_input)
-            model=obj_llm_config.get_llm_models()
+            model = obj_llm_config.get_llm_models()
 
             if not model:
                 st.error("Error: LLM Model could not be initialized")
@@ -39,14 +62,13 @@ def load_langgraph_agenticai_app():
                 st.error("Error: No usecase is selected")
                 return
 
-            graph_builder=GraphBuilder(model)
+            graph_builder = GraphBuilder(model)
             try:
-                graph=graph_builder.setup_graph(usecase)
+                graph = graph_builder.setup_graph(usecase)
                 DisplayResultStreamlit(usecase, graph, user_message).display_result_on_ui()
             except Exception as e:
-                st.error(f"Graph setup is failed 1 - {e}")
+                st.error(f"Graph setup failed - {e}")
 
-            # initialize and setup the graph based on the use case
         except Exception as e:
-                st.error(f"Graph setup is failed 2 - {e}")
-                return
+            st.error(f"Error initializing LLM - {e}")
+            return
